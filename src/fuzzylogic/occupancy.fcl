@@ -1,0 +1,236 @@
+FUNCTION_BLOCK occupancy 
+
+VAR_INPUT 
+    Temperature : REAL ;
+    Humidity : REAL;
+    Light : REAL;
+    CO2 : REAL;
+    HumidityRatio : REAL;
+    
+END_VAR
+
+VAR_OUTPUT 
+    Occupancy : REAL;
+END_VAR
+
+//bulaniklastirma
+FUZZIFY Temperature
+    TERM ilik := (19,0)(20,1)(21,0); 
+    TERM sicak := (20,0)(22,1)(25,1);
+END_FUZZIFY
+
+
+FUZZIFY Humidity 
+    TERM az := (16,1)(20,1)(25,0);
+    TERM orta := (20,0)(25,1)(30,0);
+    TERM cok := (25,0)(30,1)(45,1);
+
+END_FUZZIFY
+
+FUZZIFY Light 
+    TERM az := (0,1)(250,0);
+    TERM orta := (200,0)(400,1)(600,0);
+    TERM cok := (500,0)(1100,1)(1600,1);
+
+END_FUZZIFY
+
+FUZZIFY CO2 
+    TERM az := (400,1)(600,0);
+    TERM orta := (500,0)(600,1)(800,1)(900,0);
+    TERM cok := (800,0)(1200,1)(2200,1);
+
+END_FUZZIFY
+
+FUZZIFY HumidityRatio 
+    TERM az := (0.0,1)(0.0026,1)(0.0032,1)(0.0038,0);
+    TERM orta := (0.0032,0)(0.0040,1)(0.0042,1)(0.0050,0);
+    TERM cok := (0.0038,0)(0.0051,1)(0.0064,1);
+
+END_FUZZIFY
+
+
+DEFUZZIFY Occupancy
+
+    TERM dolu := 1; // Eğer oda dolu ise 1
+    TERM bos := 0; // Eğer oda bos ise 0
+    
+    METHOD : COGS;
+    DEFAULT := 0; // Anlamsız veri geldiğinde default olarak 0 döndür
+END_DEFUZZIFY 
+
+// MAMDANI
+RULEBLOCK kuralblok
+    AND : MIN;
+    ACT : MIN; // 2 li serilerin minimumu 
+    ACCU : MAX; // oluşan serilerin maximumu
+    
+    // Odevde hepsini and ile bağla 
+    RULE 1: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 2: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 3: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 4: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 5: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 6: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 7: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 8: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 9: IF Temperature IS ilik AND Humidity IS az AND Light IS az AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 10: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 11: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 12: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 13: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 14: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 15: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 16: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 17: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 18: IF Temperature IS ilik AND Humidity IS az AND Light IS orta AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 19: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 20: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 21: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 22: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 23: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 24: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 25: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 26: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 27: IF Temperature IS ilik AND Humidity IS az AND Light IS cok AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 28: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 29: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 30: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 31: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 32: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 33: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 34: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 35: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 36: IF Temperature IS ilik AND Humidity IS orta AND Light IS az AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 37: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 38: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 39: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 40: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 41: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 42: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 43: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 44: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 45: IF Temperature IS ilik AND Humidity IS orta AND Light IS orta AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 46: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 47: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 48: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 49: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 50: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 51: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 52: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 53: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 54: IF Temperature IS ilik AND Humidity IS orta AND Light IS cok AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 55: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 56: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 57: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 58: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 59: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 60: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 61: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 62: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 63: IF Temperature IS ilik AND Humidity IS cok AND Light IS az AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 64: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 65: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 66: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 67: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 68: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 69: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 70: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 71: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 72: IF Temperature IS ilik AND Humidity IS cok AND Light IS orta AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 73: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 74: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 75: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 76: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 77: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 78: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 79: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 80: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 81: IF Temperature IS ilik AND Humidity IS cok AND Light IS cok AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 82: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 83: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 84: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 85: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 86: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 87: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 88: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 89: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 90: IF Temperature IS sicak AND Humidity IS az AND Light IS az AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 91: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 92: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 93: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 94: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 95: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 96: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 97: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 98: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 99: IF Temperature IS sicak AND Humidity IS az AND Light IS orta AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 100: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 101: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 102: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 103: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 104: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 105: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 106: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 107: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 108: IF Temperature IS sicak AND Humidity IS az AND Light IS cok AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 109: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 110: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 111: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 112: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 113: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 114: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 115: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 116: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 117: IF Temperature IS sicak AND Humidity IS orta AND Light IS az AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 118: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 119: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 120: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 121: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 122: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 123: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 124: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 125: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 126: IF Temperature IS sicak AND Humidity IS orta AND Light IS orta AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 127: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 128: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 129: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 130: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 131: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 132: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 133: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 134: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 135: IF Temperature IS sicak AND Humidity IS orta AND Light IS cok AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 136: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 137: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 138: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 139: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 140: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 141: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 142: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS bos;
+    RULE 143: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS bos;
+    RULE 144: IF Temperature IS sicak AND Humidity IS cok AND Light IS az AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS bos;
+    RULE 145: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 146: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 147: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 148: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 149: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 150: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 151: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 152: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 153: IF Temperature IS sicak AND Humidity IS cok AND Light IS orta AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 154: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS az AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 155: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS az AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 156: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS az AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 157: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS orta AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 158: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS orta AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 159: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS orta AND HumidityRatio IS cok THEN Occupancy IS dolu;
+    RULE 160: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS cok AND HumidityRatio IS az THEN Occupancy IS dolu;
+    RULE 161: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS cok AND HumidityRatio IS orta THEN Occupancy IS dolu;
+    RULE 162: IF Temperature IS sicak AND Humidity IS cok AND Light IS cok AND CO2 IS cok AND HumidityRatio IS cok THEN Occupancy IS dolu;
+
+
+END_RULEBLOCK
+
+
+
+END_FUNCTION_BLOCK
